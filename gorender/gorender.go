@@ -40,7 +40,7 @@ const (
 	GLASS = 1.5
 )
 
-func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap /*, causticsMap*/ *kd.KDNode, start, rows int, rand *rand.Rand) {
+func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, causticsMap *kd.KDNode, start, rows int, rand *rand.Rand) {
 	samples := Config.NumRays
 	var px, py, dy, dx float64
 	var direction, contribution geometry.Vec3
@@ -60,7 +60,7 @@ func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap /*, 
 						-scene.Camera.Origin.Z,
 					}.Normalize()
 
-					contribution = Radiance(geometry.Ray{scene.Camera.Origin, direction}, scene, diffuseMap /*causticsMap,*/, 0, 1.0, rand)
+					contribution = Radiance(geometry.Ray{scene.Camera.Origin, direction}, scene, diffuseMap, causticsMap, 0, 1.0, rand)
 					colourSamples.AddInPlace(contribution)
 				}
 			}
@@ -81,9 +81,9 @@ func CorrectColours(v geometry.Vec3) geometry.Vec3 {
 }
 
 func mix(a, b geometry.Vec3, factor float64) geometry.Vec3 {
-	a.X = (1-factor)*a.X + factor*b.X
-	a.Y = (1-factor)*a.Y + factor*b.Y
-	a.Z = (1-factor)*a.Z + factor*b.Z
+	a.X -= (b.X - a.X) * factor
+	a.Y -= (b.Y - a.Y) * factor
+	a.Z -= (b.Z - a.Z) * factor
 	return a
 }
 
@@ -135,15 +135,14 @@ func Render(scene geometry.Scene) image.Image {
 	workload := scene.Rows / Config.Chunks
 
 	startTime := time.Now()
-	globals /*, caustics*/ := GenerateMaps(scene.Objects)
+	globals, caustics := GenerateMaps(scene.Objects)
 	fmt.Println(" Done!")
-	//fmt.Printf("Diffuse Map depth: %v Caustics Map depth: %v\n", globals.Depth(), caustics.Depth())
-	fmt.Printf("Diffuse Map depth: %v\n", globals.Depth())
+	fmt.Printf("Diffuse Map depth: %v Caustics Map depth: %v\n", globals.Depth(), caustics.Depth())
 	fmt.Printf("Photon Maps Done. Generation took: %v\n", time.Since(startTime))
 
 	startTime = time.Now()
 	for y := 0; y < scene.Rows; y += workload {
-		go MonteCarloPixel(pixels, &scene, globals /*caustics,*/, y, workload, rand.New(rand.NewSource(rand.Int63())))
+		go MonteCarloPixel(pixels, &scene, globals, caustics, y, workload, rand.New(rand.NewSource(rand.Int63())))
 	}
 
 	// Write targets for after effects

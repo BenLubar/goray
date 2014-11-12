@@ -18,7 +18,7 @@ var (
 	input    = new(string) //flag.String("in", "default", "The file describing the scene")
 	cores    = flag.Int("cores", 2, "The number of cores to use on the machine")
 	chunks   = flag.Int("chunks", 8, "The number of chunks to use for parallelism")
-	fov      = flag.Int("fov", 90, "The field of view of the rendered image")
+	fov      = flag.Int("fov", 75, "The field of view of the rendered image")
 	cols     = flag.Int("w", 800, "The width in pixels of the rendered image")
 	rows     = flag.Int("h", 600, "The height in pixels of the rendered image")
 	seed     = flag.Int64("seed", 1, "The seed for the random number generator")
@@ -26,8 +26,8 @@ var (
 	bloom    = flag.Int("bloom", 10, "The number of iteration to run the bloom filter")
 	mindepth = flag.Int("depth", 2, "The minimum recursion depth used for the rays")
 	rays     = flag.Int("rays", 10, "The number of rays used to sample each pixel")
-	//caustics = flag.Int("caustics", 256, "The depth of the caustic photon tracing before the render")
-	gamma = flag.Float64("gamma", 2.2, "The factor to use for gamma correction")
+	caustics = flag.Int("caustics", -1, "The depth of the caustic photon tracing before the render")
+	gamma    = flag.Float64("gamma", 2.2, "The factor to use for gamma correction")
 
 	skipTop    = flag.Int("skiptop", 0, "The number of pixels to skip calculating starting from the top of the image")
 	skipLeft   = flag.Int("skipleft", 0, "The number of pixels to skip calculating starting from the left side of the image")
@@ -45,7 +45,7 @@ func main() {
 	rand.Seed(*seed)
 
 	gorender.Config.NumRays = *rays
-	//gorender.Config.Caustics = *caustics
+	gorender.Config.Caustics = *caustics
 	gorender.Config.BloomFactor = *bloom
 	gorender.Config.MinDepth = *mindepth
 	gorender.Config.GammaFactor = *gamma

@@ -31,7 +31,7 @@ func EmitterSampling(point, normal geometry.Vec3, shapes []*geometry.Shape, rand
 	return incomingLight
 }
 
-func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMap*/ *kd.KDNode, depth int, alpha float64, rand *rand.Rand) geometry.Vec3 {
+func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap, causticsMap *kd.KDNode, depth int, alpha float64, rand *rand.Rand) geometry.Vec3 {
 
 	if depth > Config.MinDepth && rand.Float64() > alpha {
 		return geometry.Vec3{0, 0, 0}
@@ -49,9 +49,9 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 		}
 
 		if shape.Material == geometry.DIFFUSE {
-			var /*causticLight,*/ directLight geometry.Vec3
+			var causticLight, directLight geometry.Vec3
 
-			/*nodes := causticsMap.Neighbors(impact, 0.1)
+			nodes := causticsMap.Neighbors(impact, 0.1)
 			for _, e := range nodes {
 				photon := causticPhotons[e.Position]
 				dist := photon.Location.Distance(impact)
@@ -60,7 +60,7 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 			}
 			if len(nodes) > 0 {
 				causticLight = causticLight.Mult(1.0 / float64(len(nodes)))
-			}*/
+			}
 
 			directLight = EmitterSampling(impact, normal, scene.Objects, rand)
 
@@ -73,12 +73,12 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 				u.Z + outgoing.Z + v.Z,
 			}
 			bounceRay := geometry.Ray{impact, bounceDirection.Normalize()}
-			indirectLight := Radiance(bounceRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand)
+			indirectLight := Radiance(bounceRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.9, rand)
 			dot := outgoing.Dot(reverse)
 			diffuseLight := geometry.Vec3{
-				(shape.Colour.X * (directLight.X + indirectLight.X) /*+ causticLight.X*/) * dot,
-				(shape.Colour.Y * (directLight.Y + indirectLight.Y) /*+ causticLight.Y*/) * dot,
-				(shape.Colour.Z * (directLight.Z + indirectLight.Z) /*+ causticLight.Z*/) * dot,
+				(shape.Colour.X*(directLight.X+indirectLight.X) + causticLight.X) * dot,
+				(shape.Colour.Y*(directLight.Y+indirectLight.Y) + causticLight.Y) * dot,
+				(shape.Colour.Z*(directLight.Z+indirectLight.Z) + causticLight.Z) * dot,
 			}
 
 			return contribution.Add(diffuseLight)
@@ -87,7 +87,7 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 		if shape.Material == geometry.SPECULAR {
 			reflectionDirection := ray.Direction.Sub(normal.Mult(2 * outgoing.Dot(ray.Direction)))
 			reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-			incomingLight := Radiance(reflectedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.99, rand)
+			incomingLight := Radiance(reflectedRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.99, rand)
 			return incomingLight.Mult(outgoing.Dot(reverse))
 		}
 
@@ -145,11 +145,11 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 			if totalReflection {
 				reflectionDirection := ray.Direction.Sub(outgoing.Mult(2 * outgoing.Dot(ray.Direction)))
 				reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-				return Radiance(reflectedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand)
+				return Radiance(reflectedRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.9, rand)
 			} else {
 				reflectionDirection := ray.Direction.Sub(outgoing.Mult(2 * outgoing.Dot(ray.Direction)))
 				reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-				reflectedLight := Radiance(reflectedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(R)
+				reflectedLight := Radiance(reflectedRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.9, rand).Mult(R)
 
 				nDotI := normal.Dot(ray.Direction)
 				trasmittedDirection := ray.Direction.Mult(factor)
@@ -158,7 +158,7 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 
 				trasmittedDirection = trasmittedDirection.Add(normal.Mult(term2 - term3))
 				transmittedRay := geometry.Ray{impact, trasmittedDirection.Normalize()}
-				transmittedLight := Radiance(transmittedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(T)
+				transmittedLight := Radiance(transmittedRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.9, rand).Mult(T)
 				return reflectedLight.Add(transmittedLight).Mult(outgoing.Dot(reverse))
 			}
 		}

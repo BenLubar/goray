@@ -22,7 +22,7 @@ func (p PhotonHit) Position() geometry.Vec3 {
 
 type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec3, chan<- PhotonHit, float64, int, *rand.Rand)
 
-/*func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
+func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
 	if rand.Float64() > alpha {
 		return
 	}
@@ -126,7 +126,7 @@ type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec
 			}
 		}
 	}
-}*/
+}
 
 func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
 	if rand.Float64() > alpha {
@@ -238,19 +238,23 @@ func PhotonMapping(scene []*geometry.Shape, factor int, rayFunc RayFunc) ([]geom
 	return points, result
 }
 
-//var causticPhotons map[geometry.Vec3]PhotonHit
+var causticPhotons map[geometry.Vec3]PhotonHit
 
-func GenerateMaps(scene []*geometry.Shape) *kd.KDNode /*, *kd.KDNode*/ {
-	//caustics, caustics_ := PhotonMapping(scene, Config.Caustics, CausticPhoton)
+func GenerateMaps(scene []*geometry.Shape) (*kd.KDNode, *kd.KDNode) {
+	var caustics []geometry.Vec3
+	var caustics_ []PhotonHit
+	if Config.Caustics >= 0 {
+		caustics, caustics_ = PhotonMapping(scene, Config.Caustics, CausticPhoton)
+	}
 	globals, _ := PhotonMapping(scene, 16, DiffusePhoton)
 	fmt.Printf("Building KD-trees ...")
 
-	//causticPhotons = make(map[geometry.Vec3]PhotonHit)
-	//for i := range caustics {
-	//	causticPhotons[caustics[i]] = caustics_[i]
-	//}
+	causticPhotons = make(map[geometry.Vec3]PhotonHit, len(caustics))
+	for i := range caustics {
+		causticPhotons[caustics[i]] = caustics_[i]
+	}
 
 	globalsChannel := kd.AsyncNew(globals, 3)
-	//causticsChannel := kd.AsyncNew(caustics, 3)
-	return <-globalsChannel //, <-causticsChannel
+	causticsChannel := kd.AsyncNew(caustics, 3)
+	return <-globalsChannel, <-causticsChannel
 }
