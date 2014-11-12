@@ -40,27 +40,34 @@ const (
 	GLASS = 1.5
 )
 
+var (
+	PITCH = &geometry.Vec3{1, 0, 0}
+	YAW   = &geometry.Vec3{0, 1, 0}
+	ROLL  = &geometry.Vec3{0, 0, 1}
+)
+
 func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, causticsMap *kd.KDNode, start, rows int, rand *rand.Rand) {
 	samples := Config.NumRays
-	var px, py, dy, dx float64
-	var direction, contribution geometry.Vec3
 
 	for y := start; y < start+rows; y++ {
-		py = scene.Height - scene.Height*2*float64(y)/float64(scene.Rows)
+		py := scene.Height - scene.Height*2*float64(y)/float64(scene.Rows)
 		for x := 0; x < scene.Cols; x++ {
-			px = -scene.Width + scene.Width*2*float64(x)/float64(scene.Cols)
+			px := -scene.Width + scene.Width*2*float64(x)/float64(scene.Cols)
 			var colourSamples geometry.Vec3
 			if x >= Config.Skip.Left && x < scene.Cols-Config.Skip.Right &&
 				y >= Config.Skip.Top && y < scene.Rows-Config.Skip.Bottom {
 				for sample := 0; sample < samples; sample++ {
-					dy, dx = rand.Float64()*scene.PixH, rand.Float64()*scene.PixW
-					direction = geometry.Vec3{
-						px + dx - scene.Camera.Origin.X,
-						py + dy - scene.Camera.Origin.Y,
-						-scene.Camera.Origin.Z,
+					dy, dx := rand.Float64()*scene.PixH, rand.Float64()*scene.PixW
+					direction := geometry.Vec3{
+						px + dx,
+						py + dy,
+						scene.Near,
 					}.Normalize()
+					direction = geometry.RotateVector(scene.Roll, ROLL, &direction)
+					direction = geometry.RotateVector(scene.Pitch, PITCH, &direction)
+					direction = geometry.RotateVector(scene.Yaw, YAW, &direction)
 
-					contribution = Radiance(geometry.Ray{scene.Camera.Origin, direction}, scene, diffuseMap, causticsMap, 0, 1.0, rand)
+					contribution := Radiance(geometry.Ray{scene.Camera, direction}, scene, diffuseMap, causticsMap, 0, 1.0, rand)
 					colourSamples.AddInPlace(contribution)
 				}
 			}
