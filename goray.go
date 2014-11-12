@@ -22,7 +22,7 @@ var (
 	cols     = flag.Int("w", 800, "The width in pixels of the rendered image")
 	rows     = flag.Int("h", 600, "The height in pixels of the rendered image")
 	seed     = flag.Int64("seed", 1, "The seed for the random number generator")
-	output   = flag.String("out", "out.png", "Output file for the rendered scene")
+	output   = flag.String("out", "out%04d.png", "Output file for the rendered scene")
 	bloom    = flag.Int("bloom", 10, "The number of iteration to run the bloom filter")
 	mindepth = flag.Int("depth", 2, "The minimum recursion depth used for the rays")
 	rays     = flag.Int("rays", 10, "The number of rays used to sample each pixel")
@@ -88,11 +88,6 @@ func main() {
 		runtime.MemProfileRate = 0
 	}
 
-	file, err := os.OpenFile(*output, os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	fmt.Printf("Rendering %vx%v sized image with %v rays per pixel to %v\n", *cols, *rows, *rays, *output)
 
 	// "Real world" frustrum
@@ -101,10 +96,26 @@ func main() {
 	angle := math.Pi * float64(*fov) / 180.0
 
 	scene := geometry.ParseScene(*input, width, height, angle, *cols, *rows)
-	img := gorender.Render(scene)
 
-	if err = png.Encode(file, img); err != nil {
-		log.Fatal(err)
+	const x_shift = 5
+	const fps = 60
+	for i := 0; i <= 2*x_shift*fps; i++ {
+		scene.Camera.X = -(float64(i)/fps - x_shift)
+
+		img := gorender.Render(scene)
+
+		file, err := os.Create(fmt.Sprintf(*output, i))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err = png.Encode(file, img); err != nil {
+			log.Fatal(err)
+		}
+
+		if err = file.Close(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if *memprofile != "" {
