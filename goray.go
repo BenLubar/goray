@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Nightgunner5/goray/geometry"
-	"github.com/Nightgunner5/goray/gorender"
+	"github.com/BenLubar/goray/geometry"
+	"github.com/BenLubar/goray/gorender"
 	"image/png"
 	"log"
 	"math"

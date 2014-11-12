@@ -2,8 +2,8 @@ package gorender
 
 import (
 	"fmt"
-	"github.com/Nightgunner5/goray/geometry"
-	"github.com/Nightgunner5/goray/kd"
+	"github.com/BenLubar/goray/geometry"
+	"github.com/BenLubar/goray/kd"
 	"image"
 	"image/color"
 	"math"
