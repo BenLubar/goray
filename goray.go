@@ -96,9 +96,9 @@ func main() {
 	fmt.Printf("Rendering %vx%v sized image with %v rays per pixel to %v\n", *cols, *rows, *rays, *output)
 
 	// "Real world" frustrum
-	height := geometry.Float(2.0)
-	width := height * (geometry.Float(*cols) / geometry.Float(*rows)) // Aspect ratio?
-	angle := math.Pi * geometry.Float(*fov) / 180.0
+	height := 2.0
+	width := height * float64(*cols) / float64(*rows) // Aspect ratio?
+	angle := math.Pi * float64(*fov) / 180.0
 
 	scene := geometry.ParseScene(*input, width, height, angle, *cols, *rows)
 	img := gorender.Render(scene)

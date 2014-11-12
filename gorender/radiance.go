@@ -15,8 +15,8 @@ func EmitterSampling(point, normal geometry.Vec3, shapes []*geometry.Shape, rand
 		if !shape.Emission.IsZero() {
 			// It's a light source
 			direction := shape.NormalDir(point).Mult(-1)
-			u := direction.Cross(normal).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.3))
-			v := direction.Cross(u).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.3))
+			u := direction.Cross(normal).Normalize().Mult(rand.NormFloat64() * 0.3)
+			v := direction.Cross(u).Normalize().Mult(rand.NormFloat64() * 0.3)
 
 			direction.X += u.X + v.X
 			direction.Y += u.Y + v.Y
@@ -64,8 +64,8 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 
 			directLight = EmitterSampling(impact, normal, scene.Objects, rand)
 
-			u := normal.Cross(reverse).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.5))
-			v := u.Cross(normal).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.5))
+			u := normal.Cross(reverse).Normalize().Mult(rand.NormFloat64() * 0.5)
+			v := u.Cross(normal).Normalize().Mult(rand.NormFloat64() * 0.5)
 
 			bounceDirection := geometry.Vec3{
 				u.X + outgoing.X + v.X,
@@ -101,7 +101,7 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 			}
 
 			factor := n1 / n2
-			cosTi := float64(normal.Dot(reverse))
+			cosTi := normal.Dot(reverse)
 			sinTi := math.Sqrt(1 - cosTi*cosTi) // sin² + cos² = 1
 			sqrt := math.Sqrt(math.Max(1.0-math.Pow(factor*sinTi, 2), 0))
 			// Rs
@@ -149,16 +149,16 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap /*, causticsMa
 			} else {
 				reflectionDirection := ray.Direction.Sub(outgoing.Mult(2 * outgoing.Dot(ray.Direction)))
 				reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-				reflectedLight := Radiance(reflectedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(geometry.Float(R))
+				reflectedLight := Radiance(reflectedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(R)
 
-				nDotI := float64(normal.Dot(ray.Direction))
-				trasmittedDirection := ray.Direction.Mult(geometry.Float(factor))
+				nDotI := normal.Dot(ray.Direction)
+				trasmittedDirection := ray.Direction.Mult(factor)
 				term2 := factor * nDotI
 				term3 := math.Sqrt(1 - factor*factor*(1-nDotI*nDotI))
 
-				trasmittedDirection = trasmittedDirection.Add(normal.Mult(geometry.Float(term2 - term3)))
+				trasmittedDirection = trasmittedDirection.Add(normal.Mult(term2 - term3))
 				transmittedRay := geometry.Ray{impact, trasmittedDirection.Normalize()}
-				transmittedLight := Radiance(transmittedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(geometry.Float(T))
+				transmittedLight := Radiance(transmittedRay, scene, diffuseMap /*causticsMap,*/, depth+1, alpha*0.9, rand).Mult(T)
 				return reflectedLight.Add(transmittedLight).Mult(outgoing.Dot(reverse))
 			}
 		}

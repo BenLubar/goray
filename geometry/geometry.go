@@ -7,7 +7,7 @@ import (
 /////////////////////////
 // Utility
 /////////////////////////
-func AdjustEpsilon(epsilon Float, x Float) Float {
+func AdjustEpsilon(epsilon, x float64) float64 {
 	if -epsilon < x && x < epsilon {
 		return 0
 	}
@@ -22,10 +22,10 @@ type Shape struct {
 	Colour   Vec3
 	Emission Vec3
 	Position Vec3
-	Size     Float
+	Size     float64
 
 	normal Vec3
-	radius Float
+	radius float64
 	kind   int
 }
 
@@ -35,7 +35,7 @@ const (
 	kindCube
 )
 
-func (s *Shape) Intersects(ray *Ray) Float {
+func (s *Shape) Intersects(ray *Ray) float64 {
 	switch s.kind {
 	case kindSphere:
 		return sphereIntersects(s, ray)
@@ -59,9 +59,7 @@ func (s *Shape) NormalDir(point Vec3) Vec3 {
 	panic("unreachable")
 }
 
-var positiveInfinity = Float(math.Inf(+1))
-
-const pi = Float(math.Pi)
+var positiveInfinity = math.Inf(+1)
 
 func Plane(position, emission, colour, normal Vec3, materialType int) *Shape {
 	return &Shape{
@@ -76,20 +74,20 @@ func Plane(position, emission, colour, normal Vec3, materialType int) *Shape {
 	}
 }
 
-func Sphere(radius Float, position, emission, colour Vec3, materialType int) *Shape {
+func Sphere(radius float64, position, emission, colour Vec3, materialType int) *Shape {
 	return &Shape{
 		Material: materialType,
 		Colour:   colour,
 		Emission: emission,
 		Position: position,
-		Size:     pi * radius * radius,
+		Size:     math.Pi * radius * radius,
 
 		radius: radius,
 		kind:   kindSphere,
 	}
 }
 
-func Cube(radius Float, position, emission, colour Vec3, materialType int) *Shape {
+func Cube(radius float64, position, emission, colour Vec3, materialType int) *Shape {
 	return &Shape{
 		Material: materialType,
 		Colour:   colour,
@@ -102,7 +100,7 @@ func Cube(radius Float, position, emission, colour Vec3, materialType int) *Shap
 	}
 }
 
-func intersectPlane(origin, normal Vec3, r *Ray) Float {
+func intersectPlane(origin, normal Vec3, r *Ray) float64 {
 	const epsilon = 1e-12
 
 	// Orthogonal
@@ -113,11 +111,11 @@ func intersectPlane(origin, normal Vec3, r *Ray) Float {
 	return origin.SubDot(r.Origin, normal) / dot
 }
 
-func planeIntersects(s *Shape, r *Ray) Float {
+func planeIntersects(s *Shape, r *Ray) float64 {
 	return intersectPlane(s.Position, s.normal, r)
 }
 
-func sphereIntersects(s *Shape, ray *Ray) Float {
+func sphereIntersects(s *Shape, ray *Ray) float64 {
 	difference := s.Position.Sub(ray.Origin)
 	const epsilon = 1e-5
 	dot := difference.Dot(ray.Direction)
@@ -127,7 +125,7 @@ func sphereIntersects(s *Shape, ray *Ray) Float {
 		return positiveInfinity
 	}
 
-	hypotenuse = Float(math.Sqrt(float64(hypotenuse)))
+	hypotenuse = math.Sqrt(hypotenuse)
 	if diff := dot - hypotenuse; diff > epsilon {
 		return diff
 	}
@@ -137,7 +135,7 @@ func sphereIntersects(s *Shape, ray *Ray) Float {
 	return positiveInfinity
 }
 
-func cubeIntersects(s *Shape, r *Ray) Float {
+func cubeIntersects(s *Shape, r *Ray) float64 {
 	// TODO: optimize this heavily
 	min := positiveInfinity
 	for i := 0; i < 6; i++ {
@@ -180,7 +178,7 @@ func sphereNormal(s *Shape, point Vec3) Vec3 {
 
 func cubeNormal(s *Shape, point Vec3) Vec3 {
 	// TODO: optimize this heavily
-	var max Float
+	var max float64
 	var bestNormal Vec3
 	diff := point.Sub(s.Position)
 	for i := 0; i < 6; i++ {

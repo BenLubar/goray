@@ -4,17 +4,15 @@ import (
 	"math"
 )
 
-type Float float32
-
 /////////////////////////
 // Vectors
 /////////////////////////
 type Vec3 struct {
-	X, Y, Z Float
+	X, Y, Z float64
 }
 
-func (v Vec3) Abs() Float {
-	return Float(math.Sqrt(float64(v.X*v.X + v.Y*v.Y + v.Z*v.Z)))
+func (v Vec3) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
 func (v Vec3) Truncate() Vec3 {
@@ -53,7 +51,7 @@ func (v Vec3) Sub(other Vec3) Vec3 {
 	return v
 }
 
-func (v Vec3) Mult(lambda Float) Vec3 {
+func (v Vec3) Mult(lambda float64) Vec3 {
 	v.X *= lambda
 	v.Y *= lambda
 	v.Z *= lambda
@@ -67,11 +65,11 @@ func (v Vec3) MultVec(other Vec3) Vec3 {
 	return v
 }
 
-func (v Vec3) Dot(other Vec3) Float {
+func (v Vec3) Dot(other Vec3) float64 {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
 }
 
-func (v Vec3) SubDot(o, n Vec3) Float {
+func (v Vec3) SubDot(o, n Vec3) float64 {
 	return (v.X-o.X)*n.X + (v.Y-o.Y)*n.Y + (v.Z-o.Z)*n.Z
 }
 
@@ -87,11 +85,11 @@ func (v Vec3) IsZero() bool {
 	return v.X == 0 && v.Y == 0 && v.Z == 0
 }
 
-func (v Vec3) Distance(other Vec3) Float {
-	return Float(math.Sqrt(float64(v.Distance2(other))))
+func (v Vec3) Distance(other Vec3) float64 {
+	return math.Sqrt(v.Distance2(other))
 }
 
-func (v Vec3) Distance2(other Vec3) Float {
+func (v Vec3) Distance2(other Vec3) float64 {
 	dx := v.X - other.X
 	dy := v.Y - other.Y
 	dz := v.Z - other.Z
@@ -101,7 +99,7 @@ func (v Vec3) Distance2(other Vec3) Float {
 /////////////////////////
 // Ugly util functions
 /////////////////////////
-func clamp(x, min, max Float) Float {
+func clamp(x, min, max float64) float64 {
 	if x < min {
 		return min
 	}
@@ -125,9 +123,9 @@ func (v Vec3) CLAMP() Vec3 {
 	return v
 }
 
-func (v Vec3) PEAKS(a Float) Vec3 {
-	v.X = Float(math.Max(0, float64(v.X-a)))
-	v.Y = Float(math.Max(0, float64(v.Y-a)))
-	v.Z = Float(math.Max(0, float64(v.Z-a)))
+func (v Vec3) PEAKS(a float64) Vec3 {
+	v.X = math.Max(0, v.X-a)
+	v.Y = math.Max(0, v.Y-a)
+	v.Z = math.Max(0, v.Z-a)
 	return v
 }

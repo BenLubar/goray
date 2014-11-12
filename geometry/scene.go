@@ -5,15 +5,15 @@ import (
 )
 
 type Scene struct {
-	Width, Height Float
+	Width, Height float64
 	Rows, Cols    int
 	Objects       []*Shape
 	Camera        Ray
-	Near          Float
-	PixW, PixH    Float
+	Near          float64
+	PixW, PixH    float64
 }
 
-func ParseScene(filename string, width, height, fov Float, cols, rows int) Scene {
+func ParseScene(filename string, width, height, fov float64, cols, rows int) Scene {
 	var shapes []*Shape
 
 	// light source
@@ -115,12 +115,12 @@ func ParseScene(filename string, width, height, fov Float, cols, rows int) Scene
 		REFRACTIVE,          // material
 	))
 
-	near := Float(math.Abs(float64(fov) / math.Tan(float64(fov/2.0))))
+	near := math.Abs(fov / math.Tan(fov/2.0))
 
 	camera := Vec3{0, 0, near}
 
 	return Scene{width, height, rows, cols, shapes,
 		Ray{camera, Vec3{0, 0, -1}}, near,
-		2 * height / Float(rows),
-		2 * width / Float(cols)}
+		2 * height / float64(rows),
+		2 * width / float64(cols)}
 }

@@ -20,17 +20,17 @@ type KDNode struct {
 }
 
 // Convinience distance function
-func (me *KDNode) Distance(other geometry.Vec3) geometry.Float {
+func (me *KDNode) Distance(other geometry.Vec3) float64 {
 	return me.Position.Distance(other)
 }
 
 // Convinience distance^2 function
-func (me *KDNode) Distance2(other geometry.Vec3) geometry.Float {
+func (me *KDNode) Distance2(other geometry.Vec3) float64 {
 	return me.Position.Distance2(other)
 }
 
 // Extract the correct value from the geometry.Vec3 to compare on
-func comparingValue(item geometry.Vec3, dimension int) geometry.Float {
+func comparingValue(item geometry.Vec3, dimension int) float64 {
 	switch dimension {
 	case DIM_X:
 		return item.X
@@ -148,11 +148,11 @@ func New(items []geometry.Vec3, maxDimension int) *KDNode {
 // but accurate. By comparing every point to the leftmost
 // and rightmost point to the resulting sphere
 // irrelevant subtrees are cut of.
-func (tree *KDNode) Neighbors(point geometry.Vec3, r geometry.Float) []*KDNode {
+func (tree *KDNode) Neighbors(point geometry.Vec3, r float64) []*KDNode {
 	return tree.neighbors(point, r, nil)
 }
 
-func (tree *KDNode) neighbors(point geometry.Vec3, r geometry.Float, result []*KDNode) []*KDNode {
+func (tree *KDNode) neighbors(point geometry.Vec3, r float64, result []*KDNode) []*KDNode {
 	if tree == nil {
 		return result
 	}

@@ -20,7 +20,7 @@ func (p PhotonHit) Position() geometry.Vec3 {
 	return p.Location
 }
 
-type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec3, chan<- PhotonHit, geometry.Float, int, *rand.Rand)
+type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec3, chan<- PhotonHit, float64, int, *rand.Rand)
 
 /*func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
 	if rand.Float64() > alpha {
@@ -128,8 +128,8 @@ type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec
 	}
 }*/
 
-func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha geometry.Float, depth int, rand *rand.Rand) {
-	if geometry.Float(rand.Float32()) > alpha {
+func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
+	if rand.Float64() > alpha {
 		return
 	}
 	if shape, distance := ClosestIntersection(scene, ray); shape != nil {
@@ -151,8 +151,8 @@ func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 
 			if shape.Material == geometry.DIFFUSE {
 				// Random bounce for color bleeding
-				u := normal.Cross(reverse).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.5))
-				v := u.Cross(normal).Normalize().Mult(geometry.Float(rand.NormFloat64() * 0.5))
+				u := normal.Cross(reverse).Normalize().Mult(rand.NormFloat64() * 0.5)
+				v := u.Cross(normal).Normalize().Mult(rand.NormFloat64() * 0.5)
 				bounce := geometry.Vec3{
 					u.X + outgoing.X + v.X,
 					u.Y + outgoing.Y + v.Y,
@@ -186,7 +186,7 @@ func PhotonChunk(scene []*geometry.Shape, traceFunc RayFunc, shape *geometry.Sha
 			sign*math.Cos(theta),
 			math.Sin(theta)*math.Sin(phi)
 
-		direction := geometry.Vec3{geometry.Float(x), geometry.Float(y), geometry.Float(z)}
+		direction := geometry.Vec3{x, y, z}
 		ray := geometry.Ray{shape.Position, direction.Normalize()}
 		traceFunc(scene, shape, ray, shape.Emission, result, 1.0, 0, rand)
 	}
