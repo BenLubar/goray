@@ -27,5 +27,5 @@ func RotateVector(angle float64, axis, vec *Vec3) Vec3 {
 		{0, 0, 0, 1},
 	}
 
-	return m.Mult(vec).Truncate()
+	return m.Mult(vec)
 }

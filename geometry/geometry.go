@@ -5,16 +5,6 @@ import (
 )
 
 /////////////////////////
-// Utility
-/////////////////////////
-func AdjustEpsilon(epsilon, x float64) float64 {
-	if -epsilon < x && x < epsilon {
-		return 0
-	}
-	return x
-}
-
-/////////////////////////
 // Geometry
 /////////////////////////
 type Shape struct {
@@ -101,11 +91,9 @@ func Cube(radius float64, position, emission, colour Vec3, materialType int) *Sh
 }
 
 func intersectPlane(origin, normal Vec3, r *Ray) float64 {
-	const epsilon = 1e-12
-
 	// Orthogonal
 	dot := r.Direction.Dot(normal)
-	if -epsilon < dot && dot < epsilon {
+	if dot == 0 {
 		return positiveInfinity
 	}
 	return origin.SubDot(r.Origin, normal) / dot
@@ -117,7 +105,6 @@ func planeIntersects(s *Shape, r *Ray) float64 {
 
 func sphereIntersects(s *Shape, ray *Ray) float64 {
 	difference := s.Position.Sub(ray.Origin)
-	const epsilon = 1e-5
 	dot := difference.Dot(ray.Direction)
 	hypotenuse := dot*dot - difference.Dot(difference) + s.radius*s.radius
 
@@ -126,10 +113,10 @@ func sphereIntersects(s *Shape, ray *Ray) float64 {
 	}
 
 	hypotenuse = math.Sqrt(hypotenuse)
-	if diff := dot - hypotenuse; diff > epsilon {
+	if diff := dot - hypotenuse; diff > 0 {
 		return diff
 	}
-	if diff := dot + hypotenuse; diff > epsilon {
+	if diff := dot + hypotenuse; diff > 0 {
 		return diff
 	}
 	return positiveInfinity

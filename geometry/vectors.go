@@ -15,14 +15,6 @@ func (v Vec3) Abs() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
-func (v Vec3) Truncate() Vec3 {
-	const epsilon = 1e-4
-	v.X = AdjustEpsilon(epsilon, v.X)
-	v.Y = AdjustEpsilon(epsilon, v.Y)
-	v.Z = AdjustEpsilon(epsilon, v.Z)
-	return v
-}
-
 func (v Vec3) Normalize() Vec3 {
 	m := v.Abs()
 	v.X /= m

@@ -22,7 +22,7 @@ func ClosestIntersection(shapes []*geometry.Shape, ray geometry.Ray) (*geometry.
 	var closest *geometry.Shape
 	bestHit := math.Inf(+1)
 	for _, shape := range shapes {
-		if hit := shape.Intersects(&ray); hit > 0 && hit < bestHit {
+		if hit := shape.Intersects(&ray); hit > 1e-15 && hit < bestHit {
 			bestHit = hit
 			closest = shape
 		}
