@@ -14,18 +14,6 @@ import (
 //////////////////
 // Utility
 //////////////////
-func PrintDuration(t time.Duration) {
-	if hours := math.Floor(t.Hours()); hours > 0 {
-		fmt.Printf("%vh ", int(hours))
-	}
-	if minutes := math.Mod(math.Floor(t.Minutes()), 60); minutes > 0 {
-		fmt.Printf("%1.0vm ", int(minutes))
-	}
-	if seconds := math.Mod(t.Seconds(), 60); seconds > 0 {
-		fmt.Printf("%2.3vs", seconds)
-	}
-}
-
 func clearLine() {
 	fmt.Printf("\r                                                                                                          \r")
 }
@@ -151,10 +139,7 @@ func Render(scene geometry.Scene) image.Image {
 	fmt.Println(" Done!")
 	//fmt.Printf("Diffuse Map depth: %v Caustics Map depth: %v\n", globals.Depth(), caustics.Depth())
 	fmt.Printf("Diffuse Map depth: %v\n", globals.Depth())
-	fmt.Printf("Photon Maps Done. Generation took: ")
-	stopTime := time.Now()
-	PrintDuration(stopTime.Sub(startTime))
-	fmt.Println()
+	fmt.Printf("Photon Maps Done. Generation took: %v\n", time.Since(startTime))
 
 	startTime = time.Now()
 	for y := 0; y < scene.Rows; y += workload {
@@ -176,13 +161,11 @@ func Render(scene geometry.Scene) image.Image {
 	numPixels := scene.Rows * scene.Cols
 	for i := 0; i < numPixels; i++ {
 		// Print progress information every 500 pixels
-		if i%500 == 0 {
+		if i != 0 && i%500 == 0 {
 			fmt.Printf("\rRendering %6.2f%%", 100*float64(i)/float64(scene.Rows*scene.Cols))
-			so_far = time.Now().Sub(startTime)
-			remaining := time.Duration((so_far.Seconds()/float64(i))*float64(numPixels-i)) * time.Second
-			fmt.Printf(" (Time Remaining: ")
-			PrintDuration(remaining)
-			fmt.Printf(" at %0.1f pps)                \r", float64(i)/so_far.Seconds())
+			so_far = time.Since(startTime)
+			remaining := so_far * time.Duration(numPixels-i) / time.Duration(i)
+			fmt.Printf(" (Time Remaining: %v at %0.1f pps)                \r", remaining, float64(i)/so_far.Seconds())
 		}
 		pixel := <-pixels
 
@@ -208,16 +191,13 @@ func Render(scene geometry.Scene) image.Image {
 			img.SetNRGBA(x, y, color.NRGBA{uint8(colour.X), uint8(colour.Y), uint8(colour.Z), 255})
 		}
 	}
-	stopTime = time.Now()
 	clearLine()
 	fmt.Println("\rDone!")
 	fmt.Printf("Brightest pixel: %v intensity: %v\n", highest, highValue)
 	fmt.Printf("Dimmest pixel: %v intensity: %v\n", lowest, lowValue)
 
 	// Print duration
-	fmt.Printf("Rendering took ")
-	PrintDuration(stopTime.Sub(startTime))
-	fmt.Println()
+	fmt.Printf("Rendering took %v\n", time.Since(startTime))
 
 	return img
 }
