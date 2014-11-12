@@ -16,7 +16,16 @@ type Scene struct {
 func ParseScene(filename string, width, height, fov float64, cols, rows int) Scene {
 	var shapes []*Shape
 
-	// light source
+	// light source behind the camera
+	shapes = append(shapes, Plane(
+		Vec3{0, 0, 12}, // position
+		Vec3{2, 2, 2},  // emission
+		Vec3{1, 1, 1},  // colour
+		Vec3{0, 0, -1}, // normal
+		DIFFUSE,        // material
+	))
+
+	// light source behind the spheres
 	shapes = append(shapes, Sphere(
 		1,                // radius
 		Vec3{-4, 0, -10}, // position
