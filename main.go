@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/BenLubar/goray/geometry"
-	"github.com/BenLubar/goray/gorender"
+	"github.com/BenLubar/goray/render"
 	"image/png"
 	"log"
 	"math"
@@ -44,16 +44,16 @@ func main() {
 
 	rand.Seed(*seed)
 
-	gorender.Config.NumRays = *rays
-	gorender.Config.Caustics = *caustics
-	gorender.Config.BloomFactor = *bloom
-	gorender.Config.MinDepth = *mindepth
-	gorender.Config.GammaFactor = *gamma
+	render.Config.NumRays = *rays
+	render.Config.Caustics = *caustics
+	render.Config.BloomFactor = *bloom
+	render.Config.MinDepth = *mindepth
+	render.Config.GammaFactor = *gamma
 
-	gorender.Config.Skip.Top = *skipTop
-	gorender.Config.Skip.Left = *skipLeft
-	gorender.Config.Skip.Right = *skipRight
-	gorender.Config.Skip.Bottom = *skipBottom
+	render.Config.Skip.Top = *skipTop
+	render.Config.Skip.Left = *skipLeft
+	render.Config.Skip.Right = *skipRight
+	render.Config.Skip.Bottom = *skipBottom
 
 	wantedCPUs := *cores
 	if wantedCPUs < 1 {
@@ -70,7 +70,7 @@ func main() {
 		log.Fatal("The images height needs to be evenly divisible by chunks")
 	}
 
-	gorender.Config.Chunks = *chunks
+	render.Config.Chunks = *chunks
 
 	if *cpuprofile != "" {
 		cpupf, err := os.Create(*cpuprofile)
@@ -102,7 +102,7 @@ func main() {
 	for i := 0; i <= 2*x_shift*fps; i++ {
 		scene.Camera.X = -(float64(i)/fps - x_shift)
 
-		img := gorender.Render(scene)
+		img := render.Render(scene)
 
 		file, err := os.Create(fmt.Sprintf(*output, i))
 		if err != nil {
