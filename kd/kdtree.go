@@ -76,27 +76,6 @@ func (k *KDNode) Depth() int {
 	return 1 + depth
 }
 
-// Function that calls New asynconosly
-// returning a channel from which you can read the value later
-func AsyncNew(items []geometry.Vec3, maxDimension int) <-chan *KDNode {
-	channel := make(chan *KDNode)
-
-	go func() {
-		channel <- New(items, maxDimension)
-	}()
-
-	return channel
-}
-
-// Helper function to conditionally branch with go
-func condGo(condition bool, f func()) {
-	if condition {
-		go f()
-	} else {
-		f()
-	}
-}
-
 // Creates a new KD-tree by taking a *list.List of KDValues
 // Works by finding the median in every dimension and
 // recursivly creating KD-trees as children untill the list is empty.
@@ -104,38 +83,31 @@ func condGo(condition bool, f func()) {
 // Uses Go routines and channels to acheive concurrency.
 // Every level creates one new Go routine and processes one sub-tree
 // on it's own.
-func New(items []geometry.Vec3, maxDimension int) *KDNode {
-	var create func([]geometry.Vec3, chan *KDNode, int)
-	create = func(l []geometry.Vec3, result chan *KDNode, depth int) {
-		if len(l) == 0 {
-			result <- nil
-			return
-		}
+func New(items []geometry.Vec3) *KDNode {
+	return create(items, 0)
+}
 
-		// Sort the array
-		sort.Sort(valueList{l, depth % maxDimension})
-		median := len(l) / 2
-		// Adjust the median to make sure it's the FIRST of any
-		// identical values
-		dimension := depth % maxDimension
-		forbiddenValue := comparingValue(l[median], dimension)
-		for comparingValue(l[median], dimension) == forbiddenValue && median > 0 {
-			median--
-		}
-		value := l[median]
-
-		left := make(chan *KDNode, 1)
-		right := make(chan *KDNode, 1)
-
-		// Branch if high enough in the tree
-		condGo(depth < 4, func() { create(l[:median], left, depth+1) })
-		create(l[median+1:], right, depth+1)
-
-		result <- &KDNode{value, depth % maxDimension, <-left, <-right}
+func create(l []geometry.Vec3, depth int) *KDNode {
+	if len(l) == 0 {
+		return nil
 	}
-	node := make(chan *KDNode, 1)
-	create(items, node, 0)
-	return <-node
+
+	// Sort the array
+	sort.Sort(valueList{l, depth % 3})
+	median := len(l) / 2
+	// Adjust the median to make sure it's the FIRST of any
+	// identical values
+	dimension := depth % 3
+	forbiddenValue := comparingValue(l[median], dimension)
+	for comparingValue(l[median], dimension) == forbiddenValue && median > 0 {
+		median--
+	}
+	value := l[median]
+
+	left := create(l[:median], depth+1)
+	right := create(l[median+1:], depth+1)
+
+	return &KDNode{value, dimension, left, right}
 }
 
 // Searches the tree for any nodes within radius r

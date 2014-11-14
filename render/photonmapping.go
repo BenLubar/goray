@@ -251,7 +251,5 @@ func GenerateMaps(scene []*geometry.Shape) (*kd.KDNode, *kd.KDNode) {
 		causticPhotons[caustics[i]] = caustics_[i]
 	}
 
-	globalsChannel := kd.AsyncNew(globals, 3)
-	causticsChannel := kd.AsyncNew(caustics, 3)
-	return <-globalsChannel, <-causticsChannel
+	return kd.New(globals), kd.New(caustics)
 }
