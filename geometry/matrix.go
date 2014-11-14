@@ -4,9 +4,6 @@ import (
 	"math"
 )
 
-/////////////////////////
-// Matrix
-/////////////////////////
 type Mat4 [4][4]float64
 
 func (m Mat4) Mult(v *Vec3) Vec3 {

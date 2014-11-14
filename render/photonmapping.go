@@ -8,9 +8,6 @@ import (
 	"math/rand"
 )
 
-////////////////////
-// Photon Mapping
-////////////////////
 type PhotonHit struct {
 	Location, Photon, Incomming geometry.Vec3
 	Depth                       uint8

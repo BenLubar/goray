@@ -5,9 +5,6 @@ import (
 	"math"
 )
 
-/////////////////////////
-// Vectors
-/////////////////////////
 type Vec3 struct {
 	X, Y, Z float64
 }
@@ -102,9 +99,6 @@ func (v Vec3) Distance2(other Vec3) float64 {
 	return dx*dx + dy*dy + dz*dz
 }
 
-/////////////////////////
-// Ugly util functions
-/////////////////////////
 func clamp(x, min, max float64) float64 {
 	if x < min {
 		return min

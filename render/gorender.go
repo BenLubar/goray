@@ -11,11 +11,8 @@ import (
 	"time"
 )
 
-//////////////////
-// Utility
-//////////////////
 func clearLine() {
-	fmt.Printf("\r                                                                                                          \r")
+	fmt.Print("\r\x1b[K")
 }
 
 func ClosestIntersection(shapes []*geometry.Shape, ray geometry.Ray) (*geometry.Shape, float64) {

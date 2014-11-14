@@ -42,11 +42,6 @@ func comparingValue(item geometry.Vec3, dimension int) float64 {
 	panic("Trying to get higher dimensional value")
 }
 
-///////////////////////////////
-// Implement sort.Interface
-// Needed to use the sorting library
-// in the Go standard library
-///////////////////////////////
 type valueList struct {
 	values    []geometry.Vec3
 	dimension int
