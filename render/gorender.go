@@ -31,8 +31,8 @@ func ClosestIntersection(shapes []*geometry.Shape, ray geometry.Ray) (*geometry.
 }
 
 type Result struct {
-	x, y   int
-	colour geometry.Vec3
+	x, y  int
+	color geometry.Vec3
 }
 
 const (
@@ -53,7 +53,7 @@ func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, cau
 		py := scene.Height - scene.Height*2*float64(y)/float64(scene.Rows)
 		for x := 0; x < scene.Cols; x++ {
 			px := -scene.Width + scene.Width*2*float64(x)/float64(scene.Cols)
-			var colourSamples geometry.Vec3
+			var colorSamples geometry.Vec3
 			if x >= Config.Skip.Left && x < scene.Cols-Config.Skip.Right &&
 				y >= Config.Skip.Top && y < scene.Rows-Config.Skip.Bottom {
 				for sample := 0; sample < samples; sample++ {
@@ -68,22 +68,22 @@ func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, cau
 					direction = geometry.RotateVector(scene.Yaw, YAW, &direction)
 
 					contribution := Radiance(geometry.Ray{scene.Camera, direction}, scene, diffuseMap, causticsMap, 0, 1.0, rand)
-					colourSamples.AddInPlace(contribution)
+					colorSamples.AddInPlace(contribution)
 				}
 			}
-			results <- Result{x, y, colourSamples.Mult(1.0 / float64(samples))}
+			results <- Result{x, y, colorSamples.Mult(1.0 / float64(samples))}
 		}
 	}
 }
 
-func CorrectColour(x float64) float64 {
+func CorrectColor(x float64) float64 {
 	return math.Pow(x, 1.0/Config.GammaFactor)*255 + 0.5
 }
 
-func CorrectColours(v geometry.Vec3) geometry.Vec3 {
-	v.X = CorrectColour(v.X)
-	v.Y = CorrectColour(v.Y)
-	v.Z = CorrectColour(v.Z)
+func CorrectColors(v geometry.Vec3) geometry.Vec3 {
+	v.X = CorrectColor(v.X)
+	v.Y = CorrectColor(v.Y)
+	v.Z = CorrectColor(v.Z)
 	return v
 }
 
@@ -107,13 +107,13 @@ func BloomFilter(img [][]geometry.Vec3, depth int) [][]geometry.Vec3 {
 	for iteration := 0; iteration < depth; iteration++ {
 		for y := box_width; y < len(img)-box_width; y++ {
 			for x := box_width; x < len(img[0])-box_width; x++ {
-				var colour geometry.Vec3
+				var color geometry.Vec3
 				for dy := -box_width; dy <= box_width; dy++ {
 					for dx := -box_width; dx <= box_width; dx++ {
-						colour.AddInPlace(source[y+dy][x+dx])
+						color.AddInPlace(source[y+dy][x+dx])
 					}
 				}
-				data[y][x] = colour.Mult(factor)
+				data[y][x] = color.Mult(factor)
 			}
 		}
 		fmt.Printf("\rPost Processing %3.0f%%   \r", 100*float64(iteration)/float64(depth))
@@ -175,16 +175,16 @@ func Render(scene geometry.Scene) image.Image {
 		}
 		pixel := <-pixels
 
-		if low := pixel.colour.Abs(); low < lowValue {
+		if low := pixel.color.Abs(); low < lowValue {
 			lowValue = low
-			lowest = pixel.colour
+			lowest = pixel.color
 		}
-		if high := pixel.colour.Abs(); high > highValue {
+		if high := pixel.color.Abs(); high > highValue {
 			highValue = high
-			highest = pixel.colour
+			highest = pixel.color
 		}
-		data[pixel.y][pixel.x] = pixel.colour.CLAMPF()
-		peaks[pixel.y][pixel.x] = pixel.colour.PEAKS(0.8)
+		data[pixel.y][pixel.x] = pixel.color.CLAMPF()
+		peaks[pixel.y][pixel.x] = pixel.color.PEAKS(0.8)
 	}
 	fmt.Println("\rRendering 100.00%")
 
@@ -192,9 +192,9 @@ func Render(scene geometry.Scene) image.Image {
 
 	for y := 0; y < len(data); y++ {
 		for x := 0; x < len(data[0]); x++ {
-			colour := data[y][x].Add(bloomed[y][x])
-			colour = CorrectColours(colour).CLAMP()
-			img.SetNRGBA(x, y, color.NRGBA{uint8(colour.X), uint8(colour.Y), uint8(colour.Z), 255})
+			c := data[y][x].Add(bloomed[y][x])
+			c = CorrectColors(c).CLAMP()
+			img.SetNRGBA(x, y, color.NRGBA{uint8(c.X), uint8(c.Y), uint8(c.Z), 255})
 		}
 	}
 	clearLine()

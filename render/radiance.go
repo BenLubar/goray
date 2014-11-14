@@ -76,9 +76,9 @@ func Radiance(ray geometry.Ray, scene *geometry.Scene, diffuseMap, causticsMap *
 			indirectLight := Radiance(bounceRay, scene, diffuseMap, causticsMap, depth+1, alpha*0.9, rand)
 			dot := outgoing.Dot(reverse)
 			diffuseLight := geometry.Vec3{
-				(shape.Colour.X*(directLight.X+indirectLight.X) + causticLight.X) * dot,
-				(shape.Colour.Y*(directLight.Y+indirectLight.Y) + causticLight.Y) * dot,
-				(shape.Colour.Z*(directLight.Z+indirectLight.Z) + causticLight.Z) * dot,
+				(shape.Color.X*(directLight.X+indirectLight.X) + causticLight.X) * dot,
+				(shape.Color.Y*(directLight.Y+indirectLight.Y) + causticLight.Y) * dot,
+				(shape.Color.Z*(directLight.Z+indirectLight.Z) + causticLight.Z) * dot,
 			}
 
 			return contribution.Add(diffuseLight)

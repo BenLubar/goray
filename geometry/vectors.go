@@ -1,6 +1,7 @@
 package geometry
 
 import (
+	"encoding/json"
 	"math"
 )
 
@@ -9,6 +10,19 @@ import (
 /////////////////////////
 type Vec3 struct {
 	X, Y, Z float64
+}
+
+func (v *Vec3) MarshalJSON() ([]byte, error) {
+	return json.Marshal([3]float64{v.X, v.Y, v.Z})
+}
+
+func (v *Vec3) UnmarshalJSON(b []byte) error {
+	var vec [3]float64
+	if err := json.Unmarshal(b, &vec); err != nil {
+		return err
+	}
+	v.X, v.Y, v.Z = vec[0], vec[1], vec[2]
+	return nil
 }
 
 func (v Vec3) Abs() float64 {

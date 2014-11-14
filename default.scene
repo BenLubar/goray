@@ -1,0 +1,91 @@
+{
+	"Objects": [{
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [0, 0, 12],
+		"Emission": [2, 2, 2],
+		"Color":    [1, 1, 1],
+		"Normal":   [0, 0, -1]
+	}, {
+		"Type":     "SPHERE",
+		"Material": "DIFFUSE",
+		"Position": [4, 0, -10],
+		"Emission": [2, 2, 2],
+		"Color":    [1, 1, 1],
+		"Radius":   1
+	}, {
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [0, 0, -12],
+		"Emission": [0, 0, 0],
+		"Color":    [0.6, 0.6, 0.6],
+		"Normal":   [0, 0, 1]
+	}, {
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [0, -2, 0],
+		"Emission": [0, 0, 0],
+		"Color":    [0, 0.2, 0.4],
+		"Normal":   [0, 1, 0]
+	}, {
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [0, 6, 0],
+		"Emission": [0, 0, 0],
+		"Color":    [0.6, 0.4, 0.2],
+		"Normal":   [0, -1, 0]
+	}, {
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [6, 0, 0],
+		"Emission": [0, 0, 0],
+		"Color":    [0.2, 0.6, 0.2],
+		"Normal":   [-1, 0, 0]
+	}, {
+		"Type":     "PLANE",
+		"Material": "DIFFUSE",
+		"Position": [-6, 0, 0],
+		"Emission": [0, 0, 0],
+		"Color":    [0.6, 0.2, 0.4],
+		"Normal":   [1, 0, 0]
+	}, {
+		"Type":     "SPHERE",
+		"Material": "SPECULAR",
+		"Position": [3.5, 0.5, -6],
+		"Emission": [0, 0, 0],
+		"Color":    [1, 1, 1],
+		"Radius":   2.5
+	}, {
+		"Type":     "SPHERE",
+		"Material": "DIFFUSE",
+		"Position": [2, -1.25, -2],
+		"Emission": [0, 0, 0],
+		"Color":    [0.8, 0.2, 0.4],
+		"Radius":   0.75
+	}, {
+		"Type":     "SPHERE",
+		"Material": "REFRACTIVE",
+		"Position": [0.5, -1.1, -1],
+		"Emission": [0, 0, 0],
+		"Color":    [1, 1, 1],
+		"Radius":   0.9
+	}, {
+		"Type":     "SPHERE",
+		"Material": "DIFFUSE",
+		"Position": [-4, 0.5, -9.5],
+		"Emission": [0, 0, 0],
+		"Color":    [0.5, 0.5, 0.5],
+		"Radius":   2.5
+	}, {
+		"Type":     "SPHERE",
+		"Material": "REFRACTIVE",
+		"Position": [-4.5, -0.5, -7],
+		"Emission": [0, 0, 0],
+		"Color":    [1, 1, 1],
+		"Radius":   1.5
+	}],
+	"Camera": [0, 0, 2.5],
+	"Pitch":  0,
+	"Yaw":    3.14159265358979323846264338327950288419716939937510582097494459,
+	"Roll":   0
+}

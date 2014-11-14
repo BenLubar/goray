@@ -22,7 +22,7 @@ func (p PhotonHit) Position() geometry.Vec3 {
 
 type RayFunc func([]*geometry.Shape, *geometry.Shape, geometry.Ray, geometry.Vec3, chan<- PhotonHit, float64, int, *rand.Rand)
 
-func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
+func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, color geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
 	if rand.Float64() > alpha {
 		return
 	}
@@ -31,7 +31,7 @@ func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 		if emitter == shape {
 			// Leave the emitter first
 			nextRay := geometry.Ray{impact, ray.Direction}
-			CausticPhoton(scene, emitter, nextRay, colour, result, alpha, depth, rand)
+			CausticPhoton(scene, emitter, nextRay, color, result, alpha, depth, rand)
 		} else {
 			normal := shape.NormalDir(impact).Normalize()
 			reverse := ray.Direction.Mult(-1)
@@ -41,7 +41,7 @@ func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 			}
 			//fmt.Println("Hit something else!")
 			if depth > 0 {
-				strength := colour.Mult(1.0 / (alpha + distance))
+				strength := color.Mult(1.0 / (alpha + distance))
 				result <- PhotonHit{impact, strength, ray.Direction, uint8(depth)}
 			}
 
@@ -49,7 +49,7 @@ func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 			if shape.Material == geometry.SPECULAR {
 				reflection := ray.Direction.Sub(normal.Mult(2 * outgoing.Dot(ray.Direction)))
 				reflectedRay := geometry.Ray{impact, reflection.Normalize()}
-				CausticPhoton(scene, shape, reflectedRay, colour, result, alpha*0.9, depth+1, rand)
+				CausticPhoton(scene, shape, reflectedRay, color, result, alpha*0.9, depth+1, rand)
 			}
 
 			// Refracting objects makes refractions
@@ -107,11 +107,11 @@ func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 				if totalReflection {
 					reflectionDirection := ray.Direction.Sub(normal.Mult(2 * normal.Dot(ray.Direction)))
 					reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-					CausticPhoton(scene, emitter, reflectedRay, colour, result, alpha*0.9, depth+1, rand)
+					CausticPhoton(scene, emitter, reflectedRay, color, result, alpha*0.9, depth+1, rand)
 				} else {
 					reflectionDirection := ray.Direction.Sub(normal.Mult(2 * normal.Dot(ray.Direction)))
 					reflectedRay := geometry.Ray{impact, reflectionDirection.Normalize()}
-					CausticPhoton(scene, emitter, reflectedRay, colour.Mult(R), result, alpha*0.9, depth+1, rand)
+					CausticPhoton(scene, emitter, reflectedRay, color.Mult(R), result, alpha*0.9, depth+1, rand)
 
 					nDotI := normal.Dot(ray.Direction)
 					trasmittedDirection := ray.Direction.Mult(factor)
@@ -121,14 +121,14 @@ func CausticPhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 					trasmittedDirection = trasmittedDirection.Add(normal.Mult(term2 - term3))
 
 					transmittedRay := geometry.Ray{impact, trasmittedDirection.Normalize()}
-					CausticPhoton(scene, emitter, transmittedRay, colour.Mult(T), result, alpha*0.9, depth+1, rand)
+					CausticPhoton(scene, emitter, transmittedRay, color.Mult(T), result, alpha*0.9, depth+1, rand)
 				}
 			}
 		}
 	}
 }
 
-func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, colour geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
+func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometry.Ray, color geometry.Vec3, result chan<- PhotonHit, alpha float64, depth int, rand *rand.Rand) {
 	if rand.Float64() > alpha {
 		return
 	}
@@ -138,7 +138,7 @@ func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 		if depth == 0 && emitter == shape {
 			// Leave the emitter first
 			nextRay := geometry.Ray{impact, ray.Direction}
-			DiffusePhoton(scene, emitter, nextRay, colour, result, alpha, depth, rand)
+			DiffusePhoton(scene, emitter, nextRay, color, result, alpha, depth, rand)
 		} else {
 			normal := shape.NormalDir(impact).Normalize()
 			reverse := ray.Direction.Mult(-1)
@@ -146,7 +146,7 @@ func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 			if normal.Dot(reverse) < 0 {
 				outgoing = normal.Mult(-1)
 			}
-			strength := colour.Mult(alpha / (1 + distance))
+			strength := color.Mult(alpha / (1 + distance))
 			result <- PhotonHit{impact, strength, ray.Direction, uint8(depth)}
 
 			if shape.Material == geometry.DIFFUSE {
@@ -159,8 +159,8 @@ func DiffusePhoton(scene []*geometry.Shape, emitter *geometry.Shape, ray geometr
 					u.Z + outgoing.Z + v.Z,
 				}
 				bounceRay := geometry.Ray{impact, bounce.Normalize()}
-				bleedColour := colour.MultVec(shape.Colour).Mult(alpha / (1 + distance))
-				DiffusePhoton(scene, shape, bounceRay, bleedColour, result, alpha*0.66, depth+1, rand)
+				bleedColor := color.MultVec(shape.Color).Mult(alpha / (1 + distance))
+				DiffusePhoton(scene, shape, bounceRay, bleedColor, result, alpha*0.66, depth+1, rand)
 			}
 			// Store Shadow Photons
 			shadowRay := geometry.Ray{impact, ray.Direction}

@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	input    = new(string) //flag.String("in", "default", "The file describing the scene")
+	input    = flag.String("i", "default.scene", "The file describing the scene")
 	cores    = flag.Int("cores", 2, "The number of cores to use on the machine")
 	chunks   = flag.Int("chunks", 8, "The number of chunks to use for parallelism")
 	fov      = flag.Int("fov", 75, "The field of view of the rendered image")
 	cols     = flag.Int("w", 800, "The width in pixels of the rendered image")
 	rows     = flag.Int("h", 600, "The height in pixels of the rendered image")
 	seed     = flag.Int64("seed", 1, "The seed for the random number generator")
-	output   = flag.String("out", "out%04d.png", "Output file for the rendered scene")
+	output   = flag.String("o", "out%04d.png", "Output file for the rendered scene")
 	bloom    = flag.Int("bloom", 10, "The number of iteration to run the bloom filter")
 	mindepth = flag.Int("depth", 2, "The minimum recursion depth used for the rays")
 	rays     = flag.Int("rays", 10, "The number of rays used to sample each pixel")

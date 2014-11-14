@@ -1,139 +1,40 @@
 package geometry
 
 import (
+	"encoding/json"
 	"math"
+	"os"
 )
 
 type Scene struct {
-	Width, Height    float64
-	Rows, Cols       int
+	Width, Height    float64 `json:"-"`
+	Rows, Cols       int     `json:"-"`
 	Objects          []*Shape
 	Camera           Vec3
 	Pitch, Yaw, Roll float64
-	Near             float64
-	PixW, PixH       float64
+	Near             float64 `json:"-"`
+	PixW, PixH       float64 `json:"-"`
 }
 
 func ParseScene(filename string, width, height, fov float64, cols, rows int) Scene {
-	var shapes []*Shape
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
 
-	// light source behind the camera
-	shapes = append(shapes, Plane(
-		Vec3{0, 0, 12}, // position
-		Vec3{2, 2, 2},  // emission
-		Vec3{1, 1, 1},  // colour
-		Vec3{0, 0, -1}, // normal
-		DIFFUSE,        // material
-	))
+	var scene Scene
 
-	// light source behind the spheres
-	shapes = append(shapes, Sphere(
-		1,               // radius
-		Vec3{4, 0, -10}, // position
-		Vec3{2, 2, 2},   // emission
-		Vec3{1, 1, 1},   // colour
-		DIFFUSE,         // material
-	))
+	err = json.NewDecoder(f).Decode(&scene)
+	if err != nil {
+		panic(err)
+	}
 
-	// rear wall
-	shapes = append(shapes, Plane(
-		Vec3{0, 0, -12},     // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.6, 0.6, 0.6}, // colour
-		Vec3{0, 0, 1},       // normal
-		DIFFUSE,             // material
-	))
+	scene.Near = math.Abs(fov / math.Tan(fov/2.0))
+	scene.Width, scene.Height = width, height
+	scene.Cols, scene.Rows = cols, rows
+	scene.PixW = 2 * width / float64(cols)
+	scene.PixH = 2 * height / float64(rows)
 
-	// floor
-	shapes = append(shapes, Plane(
-		Vec3{0, -2, 0},    // position
-		Vec3{0, 0, 0},     // emission
-		Vec3{0, 0.2, 0.4}, // colour
-		Vec3{0, 1, 0},     // normal
-		DIFFUSE,           // material
-	))
-
-	// ceiling
-	shapes = append(shapes, Plane(
-		Vec3{0, 6, 0},       // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.6, 0.4, 0.2}, // colour
-		Vec3{0, -1, 0},      // normal
-		DIFFUSE,             // material
-	))
-
-	// left wall
-	shapes = append(shapes, Plane(
-		Vec3{6, 0, 0},       // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.2, 0.6, 0.2}, // colour
-		Vec3{-1, 0, 0},      // normal
-		DIFFUSE,             // material
-	))
-
-	// right wall
-	shapes = append(shapes, Plane(
-		Vec3{-6, 0, 0},      // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.6, 0.2, 0.4}, // colour
-		Vec3{1, 0, 0},       // normal
-		DIFFUSE,             // material
-	))
-
-	// left metal sphere
-	shapes = append(shapes, Sphere(
-		2.5,                // radius
-		Vec3{3.5, 0.5, -6}, // position
-		Vec3{0, 0, 0},      // emission
-		Vec3{1, 1, 1},      // colour
-		SPECULAR,           // material
-	))
-
-	// left plastic sphere
-	shapes = append(shapes, Sphere(
-		0.75,                // radius
-		Vec3{2, -1.25, -2},  // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.8, 0.2, 0.4}, // colour
-		DIFFUSE,             // material
-	))
-
-	// left glass sphere
-	shapes = append(shapes, Sphere(
-		0.9,                 // radius
-		Vec3{0.5, -1.1, -1}, // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{1, 1, 1},       // colour
-		REFRACTIVE,          // material
-	))
-
-	// right plastic sphere
-	shapes = append(shapes, Sphere(
-		2.5,                 // radius
-		Vec3{-4, 0.5, -9.5}, // position
-		Vec3{0, 0, 0},       // emission
-		Vec3{0.5, 0.5, 0.5}, // colour
-		DIFFUSE,             // material
-	))
-
-	// right glass sphere
-	shapes = append(shapes, Sphere(
-		1.5,                  // radius
-		Vec3{-4.5, -0.5, -7}, // position
-		Vec3{0, 0, 0},        // emission
-		Vec3{1, 1, 1},        // colour
-		REFRACTIVE,           // material
-	))
-
-	near := math.Abs(fov / math.Tan(fov/2.0))
-
-	camera := Vec3{0, 0, 2.5}
-	pitch := 0.0
-	yaw := math.Pi
-	roll := 0.0
-
-	return Scene{width, height, rows, cols, shapes,
-		camera, pitch, yaw, roll, near,
-		2 * height / float64(rows),
-		2 * width / float64(cols)}
+	return scene
 }
