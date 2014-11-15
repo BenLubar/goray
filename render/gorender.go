@@ -19,7 +19,7 @@ func ClosestIntersection(shapes []*geometry.Shape, ray geometry.Ray) (*geometry.
 	var closest *geometry.Shape
 	bestHit := math.Inf(+1)
 	for _, shape := range shapes {
-		if hit := shape.Intersects(&ray); hit > 1e-15 && hit < bestHit {
+		if hit := shape.Intersects(ray); hit > 1e-15 && hit < bestHit {
 			bestHit = hit
 			closest = shape
 		}
@@ -35,12 +35,6 @@ type Result struct {
 const (
 	AIR   = 1.0
 	GLASS = 1.5
-)
-
-var (
-	PITCH = &geometry.Vec3{1, 0, 0}
-	YAW   = &geometry.Vec3{0, 1, 0}
-	ROLL  = &geometry.Vec3{0, 0, 1}
 )
 
 func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, causticsMap *kd.KDNode, start, rows int, rand *rand.Rand) {
@@ -60,9 +54,7 @@ func MonteCarloPixel(results chan Result, scene *geometry.Scene, diffuseMap, cau
 						py + dy,
 						scene.Near,
 					}.Normalize()
-					direction = geometry.RotateVector(scene.Roll, ROLL, &direction)
-					direction = geometry.RotateVector(scene.Pitch, PITCH, &direction)
-					direction = geometry.RotateVector(scene.Yaw, YAW, &direction)
+					direction = geometry.PitchYawRollVector(scene.Pitch, scene.Yaw, scene.Roll, direction)
 
 					contribution := Radiance(geometry.Ray{scene.Camera, direction}, scene, diffuseMap, causticsMap, 0, 1.0, rand)
 					colorSamples.AddInPlace(contribution)

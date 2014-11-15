@@ -82,7 +82,7 @@ func (t *Material) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (s *Shape) Intersects(ray *Ray) float64 {
+func (s *Shape) Intersects(ray Ray) float64 {
 	switch s.Type {
 	case kindSphere:
 		return sphereIntersects(s, ray)
@@ -141,7 +141,7 @@ func Cube(radius float64, position, emission, color Vec3, materialType Material)
 	}
 }
 
-func intersectPlane(origin, normal Vec3, r *Ray) float64 {
+func intersectPlane(origin, normal Vec3, r Ray) float64 {
 	// Orthogonal
 	dot := r.Direction.Dot(normal)
 	if dot == 0 {
@@ -150,11 +150,11 @@ func intersectPlane(origin, normal Vec3, r *Ray) float64 {
 	return origin.SubDot(r.Origin, normal) / dot
 }
 
-func planeIntersects(s *Shape, r *Ray) float64 {
+func planeIntersects(s *Shape, r Ray) float64 {
 	return intersectPlane(s.Position, s.Normal, r)
 }
 
-func sphereIntersects(s *Shape, ray *Ray) float64 {
+func sphereIntersects(s *Shape, ray Ray) float64 {
 	difference := s.Position.Sub(ray.Origin)
 	dot := difference.Dot(ray.Direction)
 	hypotenuse := dot*dot - difference.Dot(difference) + s.Radius*s.Radius
@@ -173,7 +173,7 @@ func sphereIntersects(s *Shape, ray *Ray) float64 {
 	return positiveInfinity
 }
 
-func cubeIntersects(s *Shape, r *Ray) float64 {
+func cubeIntersects(s *Shape, r Ray) float64 {
 	// TODO: optimize this heavily
 	min := positiveInfinity
 	for i := 0; i < 6; i++ {

@@ -18,6 +18,7 @@ var (
 	input    = flag.String("i", "default.scene", "The file describing the scene")
 	cores    = flag.Int("cores", 2, "The number of cores to use on the machine")
 	chunks   = flag.Int("chunks", 8, "The number of chunks to use for parallelism")
+	fps      = flag.Int("fps", 60, "Frames per second of animation")
 	fov      = flag.Int("fov", 75, "The field of view of the rendered image")
 	cols     = flag.Int("w", 800, "The width in pixels of the rendered image")
 	rows     = flag.Int("h", 600, "The height in pixels of the rendered image")
@@ -98,9 +99,8 @@ func main() {
 	scene := geometry.ParseScene(*input, width, height, angle, *cols, *rows)
 
 	const x_shift = 5
-	const fps = 60
-	for i := 0; i <= 2*x_shift*fps; i++ {
-		scene.Camera.X = -(float64(i)/fps - x_shift)
+	for i := 0; i <= 2*x_shift**fps; i++ {
+		scene.Camera.X = -(float64(i)/float64(*fps) - x_shift)
 
 		img := render.Render(scene)
 
